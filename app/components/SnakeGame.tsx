@@ -3,11 +3,14 @@
 import { useState, useEffect, useRef } from 'react';
 import styles from './SnakeGame.module.css';
 
-type Position = { x: number; y: number };
+type Position = {
+  x: number;
+  y: number;
+};
+
 type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
 
 const GRID_SIZE = 20;
-const CELL_SIZE = 20;
 const GAME_SPEED = 100;
 
 export default function SnakeGame() {
@@ -18,49 +21,59 @@ export default function SnakeGame() {
   const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const gameLoopRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Spawn food at random location
+  // Browser-safe timer type
+  const gameLoopRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Spawn food
   const spawnFood = (snakeBody: Position[]) => {
-  while (true) {
-    const newFood: Position = {
-      x: Math.floor(Math.random() * GRID_SIZE),
-      y: Math.floor(Math.random() * GRID_SIZE),
-    };
+    while (true) {
+      const newFood: Position = {
+        x: Math.floor(Math.random() * GRID_SIZE),
+        y: Math.floor(Math.random() * GRID_SIZE),
+      };
 
-    const isValidPosition = !snakeBody.some(
-      (segment) => segment.x === newFood.x && segment.y === newFood.y
-    );
+      const occupied = snakeBody.some(
+        (segment) =>
+          segment.x === newFood.x && segment.y === newFood.y
+      );
 
-    if (isValidPosition) {
-      setFood(newFood);
-      return;
+      if (!occupied) {
+        setFood(newFood);
+        return;
+      }
     }
-  }
-};
+  };
 
-  // Handle keyboard input
+  // Keyboard controls
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (!isPlaying) return;
 
-      switch (e.key.toUpperCase()) {
-        case 'ARROWUP':
+      switch (e.key) {
+        case 'ArrowUp':
+        case 'w':
         case 'W':
           if (direction !== 'DOWN') setNextDirection('UP');
           e.preventDefault();
           break;
-        case 'ARROWDOWN':
+
+        case 'ArrowDown':
+        case 's':
         case 'S':
           if (direction !== 'UP') setNextDirection('DOWN');
           e.preventDefault();
           break;
-        case 'ARROWLEFT':
+
+        case 'ArrowLeft':
+        case 'a':
         case 'A':
           if (direction !== 'RIGHT') setNextDirection('LEFT');
           e.preventDefault();
           break;
-        case 'ARROWRIGHT':
+
+        case 'ArrowRight':
+        case 'd':
         case 'D':
           if (direction !== 'LEFT') setNextDirection('RIGHT');
           e.preventDefault();
@@ -69,7 +82,10 @@ export default function SnakeGame() {
     };
 
     window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+    };
   }, [direction, isPlaying]);
 
   // Game loop
@@ -81,21 +97,21 @@ export default function SnakeGame() {
         const newSnake = [...prevSnake];
         const head = { ...newSnake[0] };
 
-        // Update direction
         setDirection(nextDirection);
-        const currentDirection = nextDirection;
 
-        // Move head
-        switch (currentDirection) {
+        switch (nextDirection) {
           case 'UP':
             head.y = (head.y - 1 + GRID_SIZE) % GRID_SIZE;
             break;
+
           case 'DOWN':
             head.y = (head.y + 1) % GRID_SIZE;
             break;
+
           case 'LEFT':
             head.x = (head.x - 1 + GRID_SIZE) % GRID_SIZE;
             break;
+
           case 'RIGHT':
             head.x = (head.x + 1) % GRID_SIZE;
             break;
@@ -103,16 +119,22 @@ export default function SnakeGame() {
 
         newSnake.unshift(head);
 
-        // Check collision with self
+        // Self collision
         if (
-          newSnake.slice(1).some((segment) => segment.x === head.x && segment.y === head.y)
+          newSnake
+            .slice(1)
+            .some(
+              (segment) =>
+                segment.x === head.x &&
+                segment.y === head.y
+            )
         ) {
           setGameOver(true);
           setIsPlaying(false);
           return prevSnake;
         }
 
-        // Check collision with food
+        // Food collision
         if (head.x === food.x && head.y === food.y) {
           setScore((prev) => prev + 10);
           spawnFood(newSnake);
@@ -124,21 +146,29 @@ export default function SnakeGame() {
       });
     }, GAME_SPEED);
 
-    return () => clearInterval(gameLoopRef.current);
+    return () => {
+      if (gameLoopRef.current !== null) {
+        clearInterval(gameLoopRef.current);
+        gameLoopRef.current = null;
+      }
+    };
   }, [isPlaying, nextDirection, food]);
 
   const handleStart = () => {
     setGameOver(false);
     setScore(0);
-    setSnake([{ x: 10, y: 10 }]);
+
+    const initialSnake = [{ x: 10, y: 10 }];
+
+    setSnake(initialSnake);
     setDirection('RIGHT');
     setNextDirection('RIGHT');
-    spawnFood([{ x: 10, y: 10 }]);
+    spawnFood(initialSnake);
     setIsPlaying(true);
   };
 
   const handlePause = () => {
-    setIsPlaying(!isPlaying);
+    setIsPlaying((prev) => !prev);
   };
 
   return (
@@ -147,13 +177,14 @@ export default function SnakeGame() {
 
       <div className={styles.info}>
         <div className={styles.score}>Score: {score}</div>
+
         <div className={styles.status}>
           {gameOver ? (
             <span className={styles.gameOver}>Game Over!</span>
           ) : isPlaying ? (
             <span className={styles.playing}>Playing...</span>
           ) : (
-            <span className={styles.paused}>Ready to play</span>
+            <span className={styles.paused}>Ready to Play</span>
           )}
         </div>
       </div>
@@ -161,16 +192,27 @@ export default function SnakeGame() {
       <div className={styles.gameBoard}>
         {Array.from({ length: GRID_SIZE }).map((_, y) =>
           Array.from({ length: GRID_SIZE }).map((_, x) => {
-            const isSnake = snake.some((segment) => segment.x === x && segment.y === y);
-            const isFood = food.x === x && food.y === y;
-            const isHead = snake[0].x === x && snake[0].y === y;
+            const isSnake = snake.some(
+              (segment) =>
+                segment.x === x &&
+                segment.y === y
+            );
+
+            const isHead =
+              snake[0].x === x &&
+              snake[0].y === y;
+
+            const isFood =
+              food.x === x &&
+              food.y === y;
 
             return (
               <div
                 key={`${x}-${y}`}
-                className={`${styles.cell} ${isSnake ? styles.snake : ''} ${
-                  isFood ? styles.food : ''
-                } ${isHead ? styles.head : ''}`}
+                className={`${styles.cell}
+                ${isSnake ? styles.snake : ''}
+                ${isHead ? styles.head : ''}
+                ${isFood ? styles.food : ''}`}
               />
             );
           })
@@ -185,6 +227,7 @@ export default function SnakeGame() {
         >
           {gameOver ? 'Restart' : 'Start'}
         </button>
+
         <button
           onClick={handlePause}
           disabled={!isPlaying && !gameOver}
@@ -195,12 +238,13 @@ export default function SnakeGame() {
       </div>
 
       <div className={styles.instructions}>
-        <h2>How to Play:</h2>
+        <h2>How to Play</h2>
+
         <ul>
-          <li>Use arrow keys or WASD to control the snake</li>
-          <li>Eat the food to grow and gain points</li>
-          <li>Avoid hitting yourself or the walls</li>
-          <li>Click Start to begin the game</li>
+          <li>Use Arrow Keys or WASD.</li>
+          <li>Eat food to increase score.</li>
+          <li>Don't hit yourself.</li>
+          <li>Click Start to begin.</li>
         </ul>
       </div>
     </div>

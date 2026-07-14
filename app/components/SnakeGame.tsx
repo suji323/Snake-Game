@@ -22,22 +22,22 @@ export default function SnakeGame() {
 
   // Spawn food at random location
   const spawnFood = (snakeBody: Position[]) => {
-    let newFood: Position;
-    let isValidPosition = false;
+  while (true) {
+    const newFood: Position = {
+      x: Math.floor(Math.random() * GRID_SIZE),
+      y: Math.floor(Math.random() * GRID_SIZE),
+    };
 
-    while (!isValidPosition) {
-      newFood = {
-        x: Math.floor(Math.random() * GRID_SIZE),
-        y: Math.floor(Math.random() * GRID_SIZE),
-      };
+    const isValidPosition = !snakeBody.some(
+      (segment) => segment.x === newFood.x && segment.y === newFood.y
+    );
 
-      isValidPosition = !snakeBody.some(
-        (segment) => segment.x === newFood.x && segment.y === newFood.y
-      );
+    if (isValidPosition) {
+      setFood(newFood);
+      return;
     }
-
-    setFood(newFood);
-  };
+  }
+};
 
   // Handle keyboard input
   useEffect(() => {

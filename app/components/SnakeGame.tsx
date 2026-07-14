@@ -18,7 +18,7 @@ export default function SnakeGame() {
   const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const gameLoopRef = useRef<NodeJS.Timeout>();
+  const gameLoopRef = useRef<NodeJS.Timeout | null>(null);
 
   // Spawn food at random location
   const spawnFood = (snakeBody: Position[]) => {

@@ -1,0 +1,198 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.title {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.info {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  color: white;
+}
+
+.score {
+  font-weight: bold;
+}
+
+.status {
+  font-weight: bold;
+}
+
+.gameOver {
+  color: #ff6b6b;
+  animation: pulse 0.5s infinite;
+}
+
+.playing {
+  color: #51cf66;
+}
+
+.paused {
+  color: #ffd43b;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.gameBoard {
+  display: grid;
+  grid-template-columns: repeat(20, 20px);
+  grid-template-rows: repeat(20, 20px);
+  gap: 1px;
+  background-color: #1a1a2e;
+  padding: 10px;
+  border: 3px solid white;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.cell {
+  width: 20px;
+  height: 20px;
+  background-color: #0f0f1e;
+  border-radius: 2px;
+  transition: background-color 0.1s ease;
+}
+
+.snake {
+  background-color: #4ecdc4;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.head {
+  background-color: #44b78b;
+  box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+.food {
+  background-color: #ff6b6b;
+  animation: foodPulse 0.5s infinite;
+}
+
+@keyframes foodPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.button {
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  background-color: white;
+  color: #667eea;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  background-color: #f0f0f0;
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.instructions {
+  color: white;
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 500px;
+}
+
+.instructions h2 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.instructions ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.instructions li {
+  margin-bottom: 8px;
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 10px;
+  }
+
+  .title {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+  }
+
+  .info {
+    gap: 15px;
+    font-size: 1rem;
+    margin-bottom: 15px;
+  }
+
+  .gameBoard {
+    margin-bottom: 15px;
+  }
+
+  .controls {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .button {
+    width: 100%;
+  }
+
+  .instructions {
+    font-size: 0.9rem;
+    padding: 15px;
+  }
+
+  .instructions ul {
+    padding-left: 16px;
+  }
+
+  .instructions li {
+    margin-bottom: 6px;
+  }
+}
